@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sanova
+      POSTGRES_PASSWORD: sanova_pass
+      POSTGRES_DB: sanova_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://sanova:sanova_pass@postgres:5432/sanova_db
+      PORT: 8080
+      NODE_ENV: production
+      ADMIN_PASSWORD: sanova-admin-2024
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
