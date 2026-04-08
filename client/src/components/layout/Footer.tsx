@@ -29,10 +29,9 @@ export function Footer() {
         <div>
           <h4 className="font-serif font-semibold mb-4 text-foreground">Contact Us</h4>
           <ul className="flex flex-col gap-3">
-            <li className="text-sm text-muted-foreground">Email: hello@sanova.ph</li>
-            <li className="text-sm text-muted-foreground">Phone: +63 917 123 4567</li>
-            <li className="text-sm text-muted-foreground">Manila, Philippines</li>
-            <li className="text-sm text-muted-foreground mt-2">Follow us on Instagram @sanova.ph</li>
+            <li className="text-sm text-muted-foreground">Email: sanova.sgi@gmail.com</li>
+            <li className="text-sm text-muted-foreground">Phone: +63 9709414393</li>
+            <li className="text-sm text-muted-foreground">33 Damong Maliit Road, Novaliches Proper, Quezon City, Metro Manila, Metro Manila</li>
           </ul>
         </div>
       </div>
