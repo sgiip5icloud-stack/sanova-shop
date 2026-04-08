@@ -61,35 +61,33 @@ export function Home() {
         </div>
       </section>
 
-      {/* KOL Videos */}
+     {/* Video Reviews */}
       {kolVideos.length > 0 && (
         <section className="py-20 bg-[#fdf6fb]">
           <div className="container mx-auto px-4">
             <div className="flex flex-col items-center text-center mb-14">
-              <span className="text-xs uppercase tracking-[0.2em] text-[#F7A8C4] font-semibold mb-3">As Seen On</span>
-              <h2 className="text-3xl md:text-4xl font-serif font-medium text-foreground mb-4">Loved by Influencers</h2>
-              <p className="text-muted-foreground max-w-xl">Thousands of reviewers and content creators have shared their genuine experience with SANOVA.</p>
+              <span className="text-xs uppercase tracking-[0.2em] text-[#F7A8C4] font-semibold mb-3">Real Reviews</span>
+              <h2 className="text-3xl md:text-4xl font-serif font-medium text-foreground mb-4">What People Are Saying</h2>
+              <p className="text-muted-foreground max-w-xl">Hear from real customers who have experienced SANOVA in their homes.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {kolVideos.map(kol => (
-                <a key={kol.id} href={kol.videoUrl} target="_blank" rel="noopener noreferrer" className="group flex flex-col rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-border/40">
-                  <div className="relative aspect-video overflow-hidden bg-muted">
-                    <img src={kol.thumbnailUrl || "/assets/all-3.jpg"} alt={kol.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <Play className="h-6 w-6 text-[#1A3A6B] fill-[#1A3A6B] ml-1" />
-                      </div>
-                    </div>
-                    <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">YouTube</div>
+                <div key={kol.id} className="group flex flex-col rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-border/40">
+                  <div className="relative aspect-[9/16] overflow-hidden bg-black">
+                    <video
+                      src={kol.videoUrl}
+                      className="w-full h-full object-cover"
+                      muted
+                      loop
+                      playsInline
+                      onMouseEnter={e => (e.target as HTMLVideoElement).play()}
+                      onMouseLeave={e => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
+                    />
                   </div>
-                  <div className="p-4 flex flex-col gap-2 flex-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F7A8C4] to-[#1A3A6B] flex items-center justify-center text-white text-xs font-bold shrink-0">{kol.name.charAt(0)}</div>
-                      <div><div className="font-semibold text-sm text-foreground leading-tight">{kol.name}</div><div className="text-[11px] text-muted-foreground">{kol.followers}</div></div>
-                    </div>
+                  <div className="p-4">
                     <p className="text-sm text-muted-foreground leading-relaxed italic">"{kol.quote}"</p>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           </div>
