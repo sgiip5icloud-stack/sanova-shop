@@ -61,7 +61,7 @@ export function Home() {
         </div>
       </section>
 
-     {/* Video Reviews */}
+      {/* Video Reviews */}
       {kolVideos.length > 0 && (
         <section className="py-20 bg-[#fdf6fb]">
           <div className="container mx-auto px-4">
@@ -73,7 +73,8 @@ export function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {kolVideos.map(kol => (
                 <div key={kol.id} className="group flex flex-col rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-border/40">
-                  <div className="relative aspect-[9/16] overflow-hidden bg-black">
+                  <div className="relative aspect-[9/16] overflow-hidden bg-black cursor-pointer"
+                    onClick={() => kol.thumbnailUrl && window.open(kol.thumbnailUrl, "_blank", "noopener,noreferrer")}>
                     <video
                       src={kol.videoUrl}
                       className="w-full h-full object-cover"
@@ -83,6 +84,10 @@ export function Home() {
                       onMouseEnter={e => (e.target as HTMLVideoElement).play()}
                       onMouseLeave={e => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
                     />
+                    <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.75a8.18 8.18 0 004.76 1.52V6.84a4.84 4.84 0 01-1-.15z"/></svg>
+                      Watch on TikTok
+                    </div>
                   </div>
                   <div className="p-4">
                     <p className="text-sm text-muted-foreground leading-relaxed italic">"{kol.quote}"</p>

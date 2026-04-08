@@ -60,10 +60,10 @@ async function seed() {
  console.log("Seeding KOL videos...");
   await db.delete(kolVideosTable);
   await db.insert(kolVideosTable).values([
-    { name: "", channel: "", followers: "", videoUrl: "/assets/review1.mp4", thumbnailUrl: "", quote: "SANOVA keeps my bedroom smelling amazing all day! Absolutely obsessed with the Lavender scent 💜", sortOrder: 1 },
-    { name: "", channel: "", followers: "", videoUrl: "/assets/review2.mp4", thumbnailUrl: "", quote: "Honest review: used it for a month and it is still fragrant — totally worth every penny!", sortOrder: 2 },
-    { name: "", channel: "", followers: "", videoUrl: "/assets/review3.mp4", thumbnailUrl: "", quote: "Put SANOVA Peach in my living room and every guest asks what perfume I am wearing 🍑", sortOrder: 3 },
-    { name: "", channel: "", followers: "", videoUrl: "/assets/review4.mp4", thumbnailUrl: "", quote: "Ocean scent is so cool and refreshing — perfect for my home office 🌊", sortOrder: 4 },
+    { name: "", channel: "", followers: "", videoUrl: "/assets/review1.mp4", thumbnailUrl: "https://www.tiktok.com/@chelainavarro/video/7624788438600011028", quote: "SANOVA keeps my bedroom smelling amazing all day! Absolutely obsessed with the Lavender scent 💜", sortOrder: 1 },
+    { name: "", channel: "", followers: "", videoUrl: "/assets/review2.mp4", thumbnailUrl: "https://www.tiktok.com/@joaningcandia/video/7624921785288363284", quote: "Honest review: used it for a month and it is still fragrant — totally worth every penny!", sortOrder: 2 },
+    { name: "", channel: "", followers: "", videoUrl: "/assets/review3.mp4", thumbnailUrl: "https://www.tiktok.com/@dionnpersonal/video/7626042722436189447", quote: "Put SANOVA Peach in my living room and every guest asks what perfume I am wearing 🍑", sortOrder: 3 },
+    { name: "", channel: "", followers: "", videoUrl: "/assets/review4.mp4", thumbnailUrl: "https://www.tiktok.com/@wndywhy/video/7624826297453235472", quote: "Ocean scent is so cool and refreshing — perfect for my home office 🌊", sortOrder: 4 },
   ]);
 
   console.log("🎉 Seeding complete!");
