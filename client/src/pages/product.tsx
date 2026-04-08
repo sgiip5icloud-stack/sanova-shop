@@ -72,22 +72,79 @@ export function ProductDetail() {
             <TabsTrigger value="how-to-use" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base">How to Use</TabsTrigger>
             <TabsTrigger value="ingredients" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-3 text-base">Ingredients</TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="text-muted-foreground leading-relaxed max-w-3xl"><p>{product.description}</p></TabsContent>
+
+          <TabsContent value="description" className="text-muted-foreground leading-relaxed max-w-3xl">
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-xl font-serif font-semibold text-foreground mb-3">SANOVA – Natural Fragrance for a Better Quality of Life</h3>
+                <p>Safe and gentle for your health.</p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">The Importance of Fragrance in Living Spaces</h4>
+                <p className="mb-3">Your living and working spaces are where your daily activities take place. A pleasant natural scent helps reduce stress, protects your health, and improves mental well-being.</p>
+                <p className="mb-3">Nowadays, natural room fragrances are increasingly preferred over traditional air sprays due to their health benefits, ability to repel insects, and light, refreshing scent.</p>
+                <p className="mb-3">SANOVA introduces its reed diffuser, made from plant-based ingredients that are safe and gentle. Each scent has its own unique character, allowing you to easily choose one that matches your personality.</p>
+                <p className="mb-3">When diffused into the air, SANOVA not only freshens your space but also helps repel mosquitoes, relax your mind, reduce stress and fatigue, and promote better sleep.</p>
+                <p>SANOVA is also more affordable compared to high-end perfumes.</p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Benefits</h4>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>Eliminates odors and damp smells with plant-based deodorizing agents</li>
+                  <li>Light fruity scent helps relax the mind, improve focus, and support better sleep</li>
+                  <li>Helps repel mosquitoes naturally</li>
+                  <li>Long-lasting fragrance for over 45 days</li>
+                  <li>More affordable compared to high-end perfumes</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Suitable Spaces</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {["Bathroom", "Bedroom", "Living Room", "Workspace", "Shoe Cabinet", "Office"].map(space => (
+                    <div key={space} className="flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-2">
+                      <span className="text-primary font-bold">✓</span>
+                      <span className="text-sm">{space}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Available Scents</h4>
+                <div className="flex gap-4">
+                  {[["🍑", "Peach"], ["💜", "Lavender"], ["🌊", "Ocean"]].map(([icon, name]) => (
+                    <div key={name} className="flex items-center gap-2 bg-muted/30 rounded-full px-4 py-2">
+                      <span>{icon}</span>
+                      <span className="text-sm font-medium">{name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="how-to-use" className="text-muted-foreground leading-relaxed max-w-3xl">
             <ol className="list-decimal pl-5 space-y-3">
-              <li>Remove the decorative birdcage cover and unscrew the cap.</li>
-              <li>Remove the plastic stopper from the bottle.</li>
-              <li>Screw the cap back on and place the birdcage cover over it.</li>
-              <li>Insert the provided reed sticks into the bottle.</li>
-              <li>Allow 24-48 hours for the fragrance to fully diffuse.</li>
-              <li>For a stronger scent, flip the reeds every 1-2 weeks.</li>
+              <li>Tear the packaging along the dotted line on the cap and bottle.</li>
+              <li>Remove the outer cap.</li>
+              <li>Remove the inner stopper and adjust the length of the diffuser wick.</li>
+              <li>Insert the cotton wick and close the cap.</li>
+              <li>Allow 24–48 hours for the fragrance to fully diffuse.</li>
+              <li>For a stronger scent, flip the wick every 1–2 weeks.</li>
             </ol>
           </TabsContent>
+
           <TabsContent value="ingredients" className="text-muted-foreground leading-relaxed max-w-3xl">
+            <h4 className="font-semibold text-foreground mb-3">Key Ingredients</h4>
             <ul className="list-disc pl-5 space-y-2">
-              <li>Premium Fragrance Oils</li><li>Dipropylene Glycol Methyl Ether (DPG) Carrier</li><li>Alcohol (Ethanol)</li><li>Distilled Water</li>
+              <li>Deionized Water</li>
+              <li>Plant-based Deodorizing Agents</li>
+              <li>Fruity Fragrances (Natural Extracts)</li>
             </ul>
-            <p className="mt-4 italic text-sm">Free from phthalates, parabens, and formaldehydes.</p>
+            <p className="mt-4 italic text-sm">Free from phthalates, parabens, and formaldehydes. Safe for children and pets.</p>
           </TabsContent>
         </Tabs>
       </div>
