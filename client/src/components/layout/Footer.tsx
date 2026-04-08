@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-
 export function Footer() {
   return (
     <footer className="bg-muted py-12 md:py-16 mt-auto">
@@ -31,8 +30,19 @@ export function Footer() {
           <ul className="flex flex-col gap-3">
             <li className="text-sm text-muted-foreground">Email: sanova.sgi@gmail.com</li>
             <li className="text-sm text-muted-foreground">Phone: +63 9709414393</li>
-            <li className="text-sm text-muted-foreground">33 Damong Maliit Road, Novaliches Proper, Quezon City, Metro Manila, Metro Manila</li>
+            <li className="text-sm text-muted-foreground">33 Damong Maliit Road, Novaliches Proper, Quezon City, Metro Manila</li>
           </ul>
+          <div className="flex gap-4 mt-4">
+            <a href="https://shopee.ph/product/1742720557/57057828484" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+              <img src="https://img.icons8.com/color/32/shopee.png" alt="Shopee" className="h-8 w-8" />
+            </a>
+            <a href="https://www.tiktok.com/@sanova613" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+              <img src="https://img.icons8.com/color/32/tiktok.png" alt="TikTok" className="h-8 w-8" />
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61588584142890" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+              <img src="https://img.icons8.com/color/32/facebook-new.png" alt="Facebook" className="h-8 w-8" />
+            </a>
+          </div>
         </div>
       </div>
       <div className="container mx-auto px-4 mt-12 pt-8 border-t border-border/40 text-center">
