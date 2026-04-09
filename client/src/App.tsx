@@ -15,6 +15,7 @@ import { Orders } from "@/pages/orders";
 import { Login } from "@/pages/login";
 import { Register } from "@/pages/register";
 import { Admin } from "@/pages/admin";
+import { BuyNow } from "@/pages/buy-now";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ function Router() {
             <Route path="/" component={Home} />
             <Route path="/shop" component={Shop} />
             <Route path="/product/:id" component={ProductDetail} />
+            <Route path="/buy/:id" component={BuyNow} />
             <Route path="/cart" component={Cart} />
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-success" component={OrderSuccess} />
