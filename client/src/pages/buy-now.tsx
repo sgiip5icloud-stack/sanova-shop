@@ -15,7 +15,7 @@ const VALID_VOUCHERS: Record<string, number> = {
   "SANOSGI2": 50,
   "SANOSGI3": 50,
   "SANOSGI4": 50,
-  "SANOSGI4": 50,
+  "SANOSGI5": 50,
 };
 
 export function BuyNow() {
