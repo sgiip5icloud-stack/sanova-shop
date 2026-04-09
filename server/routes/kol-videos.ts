@@ -52,4 +52,25 @@ router.delete("/admin/kol-videos/:id", async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to delete" }); }
 });
 
+router.get("/admin/orders", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    const { db } = await import("../db.js");
+    const { ordersTable, orderItemsTable } = await import("../schema.js");
+    const { desc, eq } = await import("drizzle-orm");
+    const orders = await db.select().from(ordersTable).orderBy(desc(ordersTable.id));
+    const result = await Promise.all(orders.map(async (order) => {
+      const items = await db.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, order.id));
+      return {
+        id: order.id, customerName: order.customerName, customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone, address: order.address, city: order.city,
+        note: order.note, status: order.status, totalAmount: Number(order.totalAmount),
+        items: items.map(i => ({ id: i.id, productId: i.productId, productName: i.productName, quantity: i.quantity, price: Number(i.price), image: i.image })),
+        createdAt: order.createdAt.toISOString(),
+      };
+    }));
+    res.json(result);
+  } catch { res.status(500).json({ error: "Failed to fetch orders" }); }
+});
+
 export default router;
