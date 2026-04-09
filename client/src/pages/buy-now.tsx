@@ -12,9 +12,10 @@ import { Loader2, ArrowLeft, Check, Tag, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const VALID_VOUCHERS: Record<string, number> = {
-  "SANOVA50": 50,
-  "WELCOME50": 50,
-  "HALF": 50,
+  "SANOSGI2": 50,
+  "SANOSGI3": 50,
+  "SANOSGI4": 50,
+  "SANOSGI4": 50,
 };
 
 export function BuyNow() {
