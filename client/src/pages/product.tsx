@@ -52,9 +52,16 @@ export function ProductDetail() {
               </div>
             </div>
           )}
-          <Button size="lg" className="h-12 rounded-full text-base shadow-lg shadow-primary/20 mb-4" onClick={() => window.open(SHOPEE_URL, "_blank")} disabled={!product.inStock}>
-            <ShoppingBag className="mr-2 h-5 w-5" />{product.inStock ? "Buy on Shopee" : "Out of Stock"}
-          </Button>
+          <div className="flex flex-col gap-3 mb-4">
+            <Button size="lg" className="h-12 rounded-full text-base shadow-lg shadow-primary/20 bg-[#1A3A6B] hover:bg-[#152d54]" asChild>
+              <Link href={`/buy/${product.id}`}>
+                <ShoppingBag className="mr-2 h-5 w-5" /> Buy Now
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="h-12 rounded-full text-base" onClick={() => window.open(SHOPEE_URL, "_blank")} disabled={!product.inStock}>
+              🛒 Buy on Shopee
+            </Button>
+          </div>
           <div className="flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-8">
             <span className="text-xl shrink-0">🛒</span>
             <p className="text-sm text-orange-800 leading-snug"><span className="font-semibold">Get a better deal on Shopee!</span> Tap "Buy on Shopee" to enjoy exclusive discounts and fast delivery.</p>

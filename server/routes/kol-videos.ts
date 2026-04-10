@@ -72,5 +72,17 @@ router.get("/admin/orders", async (req, res) => {
     res.json(result);
   } catch { res.status(500).json({ error: "Failed to fetch orders" }); }
 });
-
+router.put("/admin/orders/:id/status", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { status } = req.body;
+    const { db } = await import("../db.js");
+    const { ordersTable } = await import("../schema.js");
+    const { eq } = await import("drizzle-orm");
+    const [updated] = await db.update(ordersTable).set({ status }).where(eq(ordersTable.id, id)).returning();
+    if (!updated) { res.status(404).json({ error: "Order not found" }); return; }
+    res.json({ success: true, status: updated.status });
+  } catch { res.status(500).json({ error: "Failed to update status" }); }
+});
 export default router;

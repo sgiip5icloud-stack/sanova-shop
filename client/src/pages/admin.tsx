@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Pencil, Trash2, Save, X, Lock, Package, Film, ChevronDown, ChevronUp } from "lucide-react";
 import { formatPrice } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { KolVideo, Order } from "@/lib/api";
 
 type KolForm = { name: string; channel: string; followers: string; videoUrl: string; thumbnailUrl: string; quote: string };
@@ -34,16 +35,52 @@ function useAdminPassword() {
 
 function OrdersPanel() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const qc = useQueryClient();
+  const password = sessionStorage.getItem("admin_pw") || "";
+
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["admin-orders"],
     queryFn: async () => {
       const res = await fetch("/api/admin/orders", {
-        headers: { "x-admin-password": sessionStorage.getItem("admin_pw") || "" },
+        headers: { "x-admin-password": password },
       });
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
   });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      await fetch(`/api/admin/orders/${id}/status`, {
+        method: "PUT",
+        headers: { "x-admin-password": password, "content-type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-orders"] }),
+  });
+
+  const statuses = ["pending", "confirmed", "shipping", "delivered", "cancelled"];
+
+  const statusColor = (s: string, active: boolean) => {
+    if (!active) return "";
+    switch (s) {
+      case "pending": return "bg-yellow-500 hover:bg-yellow-600 text-white";
+      case "confirmed": return "bg-blue-600 hover:bg-blue-700 text-white";
+      case "shipping": return "bg-orange-500 hover:bg-orange-600 text-white";
+      case "delivered": return "bg-green-600 hover:bg-green-700 text-white";
+      case "cancelled": return "bg-destructive hover:bg-destructive/90 text-white";
+      default: return "";
+    }
+  };
+
+  const badgeVariant = (s: string) => {
+    switch (s) {
+      case "delivered": return "default" as const;
+      case "cancelled": return "destructive" as const;
+      default: return "secondary" as const;
+    }
+  };
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
@@ -65,11 +102,7 @@ function OrdersPanel() {
                 <span className="font-semibold text-primary">{formatPrice(order.totalAmount)}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Badge variant={
-                  order.status === "delivered" ? "default" :
-                  order.status === "cancelled" ? "destructive" :
-                  "secondary"
-                } className="capitalize">{order.status}</Badge>
+                <Badge variant={badgeVariant(order.status)} className="capitalize">{order.status}</Badge>
                 <span className="text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</span>
                 {expandedId === order.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </div>
@@ -117,6 +150,32 @@ function OrdersPanel() {
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Total</span>
                   <span className="font-bold text-lg text-primary">{formatPrice(order.totalAmount)}</span>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <span className="text-sm font-semibold block mb-3">Update Status</span>
+                  <div className="flex flex-wrap gap-2">
+                    {statuses.map(s => (
+                      <Button
+                        key={s}
+                        size="sm"
+                        variant={order.status === s ? "default" : "outline"}
+                        className={cn(
+                          "capitalize rounded-full",
+                          order.status === s && statusColor(s, true)
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatus.mutate({ id: order.id, status: s });
+                        }}
+                        disabled={updateStatus.isPending}
+                      >
+                        {s}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
