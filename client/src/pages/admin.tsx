@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Pencil, Trash2, Save, X, Lock, Package, Film, ChevronDown, ChevronUp } from "lucide-react";
 import { formatPrice } from "@/lib/format";
+import { getProductImage } from "@/lib/product-images";
 import { cn } from "@/lib/utils";
 import type { KolVideo, Order } from "@/lib/api";
 
@@ -35,6 +36,7 @@ function useAdminPassword() {
 
 function OrdersPanel() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const qc = useQueryClient();
   const password = sessionStorage.getItem("admin_pw") || "";
 
@@ -58,6 +60,20 @@ function OrdersPanel() {
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-orders"] }),
+  });
+
+  const deleteOrder = useMutation({
+    mutationFn: async (id: number) => {
+      await fetch(`/api/admin/orders/${id}`, {
+        method: "DELETE",
+        headers: { "x-admin-password": password },
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      setDeleteConfirm(null);
+      setExpandedId(null);
+    },
   });
 
   const statuses = ["pending", "confirmed", "shipping", "delivered", "cancelled"];
@@ -135,12 +151,15 @@ function OrdersPanel() {
                 <div>
                   <span className="text-sm font-semibold block mb-2">Order Items</span>
                   {order.items.map(item => (
-                    <div key={item.id} className="flex items-center justify-between py-2 text-sm">
-                      <div>
-                        <span className="font-medium">{item.productName}</span>
-                        <span className="text-muted-foreground ml-2">× {item.quantity}</span>
+                    <div key={item.id} className="flex items-center gap-4 py-3 text-sm">
+                      <div className="w-14 h-14 rounded-lg bg-white border overflow-hidden shrink-0 shadow-sm">
+                        <img src={getProductImage(item.image)} alt={item.productName} className="w-full h-full object-contain p-1" />
                       </div>
-                      <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium block truncate">{item.productName}</span>
+                        <span className="text-muted-foreground">× {item.quantity}</span>
+                      </div>
+                      <span className="font-medium shrink-0">{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   ))}
                 </div>
@@ -176,6 +195,25 @@ function OrdersPanel() {
                       </Button>
                     ))}
                   </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  {deleteConfirm === order.id ? (
+                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+                      <span className="text-sm text-red-800 flex-1">Are you sure? This cannot be undone.</span>
+                      <Button size="sm" variant="destructive" onClick={(e) => { e.stopPropagation(); deleteOrder.mutate(order.id); }} disabled={deleteOrder.isPending}>
+                        {deleteOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Trash2 className="h-4 w-4 mr-1" />}
+                        Delete
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(null); }}>Cancel</Button>
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-red-50" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(order.id); }}>
+                      <Trash2 className="h-4 w-4 mr-2" /> Delete Order
+                    </Button>
+                  )}
                 </div>
               </div>
             )}

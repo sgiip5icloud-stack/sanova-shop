@@ -85,4 +85,16 @@ router.put("/admin/orders/:id/status", async (req, res) => {
     res.json({ success: true, status: updated.status });
   } catch { res.status(500).json({ error: "Failed to update status" }); }
 });
+router.delete("/admin/orders/:id", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { db } = await import("../db.js");
+    const { ordersTable, orderItemsTable } = await import("../schema.js");
+    const { eq } = await import("drizzle-orm");
+    await db.delete(orderItemsTable).where(eq(orderItemsTable.orderId, id));
+    await db.delete(ordersTable).where(eq(ordersTable.id, id));
+    res.json({ success: true });
+  } catch { res.status(500).json({ error: "Failed to delete order" }); }
+});
 export default router;
