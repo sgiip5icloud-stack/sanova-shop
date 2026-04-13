@@ -86,8 +86,7 @@ export function BuyNow() {
   const subtotalBeforeDiscount = lines.reduce((s, l) => s + l.product.price * l.qty, 0);
   const discountAmount = discount > 0 ? subtotalBeforeDiscount * discount / 100 : 0;
   const subtotal = subtotalBeforeDiscount - discountAmount;
-  const shipping = lines.length > 0 ? 60 : 0;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   const handleSubmit = async () => {
     if (!form.name || !form.phone || !form.address) {
@@ -294,10 +293,6 @@ export function BuyNow() {
                       <span>-{formatPrice(discountAmount)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span>{formatPrice(shipping)}</span>
-                  </div>
                 </div>
 
                 <Separator className="mb-4" />
@@ -321,7 +316,6 @@ export function BuyNow() {
             <div className="flex flex-col gap-2 text-xs text-muted-foreground mt-4">
               <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-green-500" />Cash on Delivery — pay when you receive</div>
               <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-green-500" />Delivery in 2–5 business days</div>
-              <div className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-green-500" />100% authentic — money-back guarantee</div>
             </div>
           </div>
         </div>
