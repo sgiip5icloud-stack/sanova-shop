@@ -86,4 +86,60 @@ router.get("/auth/me", async (req, res) => {
   res.json({ id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role });
 });
 
+// =====================
+// ADMIN USER MANAGEMENT
+// =====================
+
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "sanova-admin-2024";
+
+function checkAdmin(req: any, res: any): boolean {
+  const password = req.headers["x-admin-password"];
+  if (password !== ADMIN_PASSWORD) { res.status(401).json({ error: "Unauthorized" }); return false; }
+  return true;
+}
+
+router.get("/admin/users", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const users = await db.select({
+    id: usersTable.id,
+    name: usersTable.name,
+    email: usersTable.email,
+    phone: usersTable.phone,
+    role: usersTable.role,
+    createdAt: usersTable.createdAt,
+  }).from(usersTable).orderBy(usersTable.createdAt);
+  res.json(users);
+});
+
+router.put("/admin/users/:id/role", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+
+  const { role } = req.body;
+  if (!role || !["customer", "admin"].includes(role)) {
+    res.status(400).json({ error: "Role must be 'customer' or 'admin'" }); return;
+  }
+
+  const [updated] = await db.update(usersTable)
+    .set({ role })
+    .where(eq(usersTable.id, id))
+    .returning();
+
+  if (!updated) { res.status(404).json({ error: "User not found" }); return; }
+  res.json({ id: updated.id, name: updated.name, email: updated.email, phone: updated.phone, role: updated.role });
+});
+
+router.delete("/admin/users/:id", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+
+  // Delete sessions first
+  await db.delete(sessionsTable).where(eq(sessionsTable.userId, id));
+  const [deleted] = await db.delete(usersTable).where(eq(usersTable.id, id)).returning();
+  if (!deleted) { res.status(404).json({ error: "User not found" }); return; }
+  res.json({ success: true });
+});
+
 export default router;

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Pencil, Trash2, Save, X, Lock, Package, Film, ShoppingBag, ChevronDown, ChevronUp, Check, Star, Eye, EyeOff, Upload } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Save, X, Lock, Package, Film, ShoppingBag, ChevronDown, ChevronUp, Check, Star, Eye, EyeOff, Upload, Users, Shield, UserCog } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { formatPrice } from "@/lib/format";
 import { getProductImage } from "@/lib/product-images";
@@ -654,9 +654,112 @@ function ProductsPanel() {
   );
 }
 
+type AdminUser = {
+  id: number; name: string; email: string; phone: string | null; role: string; createdAt: string;
+};
+
+function UsersPanel() {
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const qc = useQueryClient();
+  const password = sessionStorage.getItem("admin_pw") || "";
+  const headers: Record<string, string> = { "x-admin-password": password, "content-type": "application/json" };
+
+  const { data: users = [], isLoading } = useQuery<AdminUser[]>({
+    queryKey: ["admin-users"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/users", { headers: { "x-admin-password": password } });
+      if (!res.ok) throw new Error("Failed to fetch users");
+      return res.json();
+    },
+  });
+
+  const toggleRole = useMutation({
+    mutationFn: async ({ id, role }: { id: number; role: string }) => {
+      const res = await fetch(`/api/admin/users/${id}/role`, {
+        method: "PUT", headers,
+        body: JSON.stringify({ role }),
+      });
+      if (!res.ok) throw new Error("Failed to update role");
+      return res.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-users"] }),
+  });
+
+  const deleteUser = useMutation({
+    mutationFn: async (id: number) => {
+      await fetch(`/api/admin/users/${id}`, { method: "DELETE", headers: { "x-admin-password": password } });
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-users"] }); setDeleteConfirm(null); },
+  });
+
+  if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+
+  const admins = users.filter(u => u.role === "admin");
+  const customers = users.filter(u => u.role === "customer");
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">{users.length} users ({admins.length} admins, {customers.length} customers)</span>
+      </div>
+
+      {users.map(u => (
+        <div key={u.id} className="border rounded-xl bg-card p-4 flex items-center gap-4">
+          <div className={cn(
+            "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
+            u.role === "admin" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500"
+          )}>
+            {u.role === "admin" ? <Shield className="h-5 w-5" /> : <UserCog className="h-5 w-5" />}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium">{u.name}</span>
+              <Badge variant={u.role === "admin" ? "default" : "secondary"} className="text-xs capitalize">{u.role}</Badge>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5 flex-wrap">
+              <span>{u.email}</span>
+              {u.phone && <span>{u.phone}</span>}
+              <span>{new Date(u.createdAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <Button
+              variant={u.role === "admin" ? "default" : "outline"}
+              size="sm"
+              onClick={() => toggleRole.mutate({ id: u.id, role: u.role === "admin" ? "customer" : "admin" })}
+              disabled={toggleRole.isPending}
+              className="text-xs"
+            >
+              {toggleRole.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Shield className="h-3 w-3 mr-1" />}
+              {u.role === "admin" ? "Remove admin" : "Make admin"}
+            </Button>
+
+            {deleteConfirm === u.id ? (
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="destructive" onClick={() => deleteUser.mutate(u.id)} disabled={deleteUser.isPending}>
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => setDeleteConfirm(null)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button variant="ghost" size="icon" className="text-destructive" onClick={() => setDeleteConfirm(u.id)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function Admin() {
   const { password, isAuth, loginInput, setLoginInput, login } = useAdminPassword();
-  const [tab, setTab] = useState<"orders" | "products" | "kol">("products");
+  const [tab, setTab] = useState<"orders" | "products" | "kol" | "users">("products");
 
   if (!isAuth) return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -685,11 +788,15 @@ export function Admin() {
         <Button variant={tab === "kol" ? "default" : "outline"} onClick={() => setTab("kol")} className="rounded-full">
           <Film className="h-4 w-4 mr-2" /> KOL Videos
         </Button>
+        <Button variant={tab === "users" ? "default" : "outline"} onClick={() => setTab("users")} className="rounded-full">
+          <Users className="h-4 w-4 mr-2" /> Users
+        </Button>
       </div>
 
       {tab === "products" && <ProductsPanel />}
       {tab === "orders" && <OrdersPanel />}
       {tab === "kol" && <KolPanel />}
+      {tab === "users" && <UsersPanel />}
     </div>
   );
 }
