@@ -420,7 +420,7 @@ function ProductsPanel() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
   });
 
-  const ProductFormFields = () => (
+  const productFormFields = (
     <div className="grid gap-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
@@ -508,7 +508,7 @@ function ProductsPanel() {
       {addingNew && (
         <div className="border rounded-xl p-6 bg-card">
           <h3 className="font-semibold mb-4">New product</h3>
-          <ProductFormFields />
+          {productFormFields}
           <div className="flex gap-2 mt-4">
             <Button onClick={() => createMut.mutate(form)} disabled={createMut.isPending || !form.name || !form.scent || !form.price || !form.image}>
               {createMut.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}Save
@@ -524,7 +524,7 @@ function ProductsPanel() {
           {editingId === p.id ? (
             <div className="p-6">
               <h3 className="font-semibold mb-4">Edit product #{p.id}</h3>
-              <ProductFormFields />
+              {productFormFields}
               <div className="flex gap-2 mt-4">
                 <Button onClick={() => updateMut.mutate({ id: p.id, data: form })} disabled={updateMut.isPending}>
                   {updateMut.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}Save

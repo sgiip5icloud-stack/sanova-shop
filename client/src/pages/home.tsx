@@ -132,12 +132,15 @@ export function Home() {
       {/* About */}
       <section id="about" className="py-20 bg-[#fdf6fb]">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Hero intro */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
             <div className="order-2 lg:order-1 flex flex-col gap-6">
               <span className="text-xs uppercase tracking-[0.2em] text-[#F7A8C4] font-semibold">Our Story</span>
-              <h2 className="text-3xl md:text-4xl font-serif font-medium text-foreground">The Scent of Home</h2>
-              <p className="text-muted-foreground leading-relaxed">Born in Vietnam with a vision to elevate everyday living, SANOVA blends traditional craftsmanship with modern scent design.</p>
-              <p className="text-muted-foreground leading-relaxed">Our three signature scents — warm Peach, calming Lavender, and fresh Ocean — were carefully developed to suit different moods and spaces.</p>
+              <h2 className="text-3xl md:text-4xl font-serif font-medium text-foreground">SANOVA – Natural Fragrance for a Better Quality of Life</h2>
+              <p className="text-lg text-[#F7A8C4] font-medium">Safe and gentle for human and pet.</p>
+              <p className="text-muted-foreground leading-relaxed">Your living and working spaces are where your daily activities take place. A pleasant natural scent helps reduce stress, protects your health, and improves mental well-being.</p>
+              <p className="text-muted-foreground leading-relaxed">Nowadays, natural room fragrances are increasingly preferred over traditional air sprays due to their health benefits, ability to repel insects, and light, refreshing scent.</p>
+              <p className="text-muted-foreground leading-relaxed">Each scent has its own unique character, allowing you to easily choose one that matches your personality.</p>
               <div className="pt-2">
                 <Button className="rounded-full px-8 bg-[#1A3A6B] hover:bg-[#152d54] text-white" asChild>
                   <Link href="/shop">Explore the Collection <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -145,6 +148,93 @@ export function Home() {
               </div>
             </div>
             <div className="order-1 lg:order-2 relative"><img src="/assets/all-3.jpg" alt="SANOVA 3 Scents" className="w-full h-auto rounded-2xl shadow-xl" /></div>
+          </div>
+
+          {/* Benefits + Ingredients */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20">
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <h3 className="text-xl font-serif font-medium text-foreground mb-6 flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#F7A8C4]" /> Benefits</h3>
+              <ul className="space-y-3 text-muted-foreground">
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Eliminates odors and damp smells</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Light fruity scent helps relax the mind, improve focus, and support better sleep</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Long-lasting fragrance for over 45 days</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Helps relax your mind, reduce stress and fatigue, and promote better sleep</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> More affordable compared to high-end perfumes</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <h3 className="text-xl font-serif font-medium text-foreground mb-6 flex items-center gap-2"><Leaf className="h-5 w-5 text-[#F7A8C4]" /> Key Ingredients</h3>
+              <ul className="space-y-3 text-muted-foreground">
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Deionized water</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Hydrogenated castor oil</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Surfactant</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Citroial essential oil</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Deodorant</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Essence</li>
+                <li className="flex items-start gap-3"><span className="text-[#F7A8C4] mt-0.5">✦</span> Sodium benzoate</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* How to Use */}
+          <div className="mb-20">
+            <h3 className="text-2xl font-serif font-medium text-foreground text-center mb-10">How to Use</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { step: "1", title: "Tear the packaging", desc: "Along the dotted line" },
+                { step: "2", title: "Remove the outer cap", desc: "Carefully remove" },
+                { step: "3", title: "Remove the inner stopper", desc: "Adjust the wick length" },
+                { step: "4", title: "Insert the wick", desc: "Close the cap and enjoy" },
+              ].map(s => (
+                <div key={s.step} className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-[#F7A8C4] text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">{s.step}</div>
+                  <h4 className="font-medium text-foreground mb-1">{s.title}</h4>
+                  <p className="text-sm text-muted-foreground">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Suitable Spaces */}
+          <div className="mb-20">
+            <h3 className="text-2xl font-serif font-medium text-foreground text-center mb-10">Suitable Spaces</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { icon: "🛏️", title: "Bedroom", desc: "Relax and sleep better" },
+                { icon: "🚿", title: "Bathroom", desc: "Eliminate dampness and odors" },
+                { icon: "🚗", title: "Cars", desc: "Fresh ride every day" },
+                { icon: "👟", title: "Shoe Cabinet", desc: "No more shoe odor" },
+              ].map(s => (
+                <div key={s.title} className="bg-white rounded-2xl p-6 text-center shadow-sm">
+                  <div className="text-3xl mb-3">{s.icon}</div>
+                  <h4 className="font-medium text-foreground mb-1">{s.title}</h4>
+                  <p className="text-sm text-muted-foreground">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Available Scents */}
+          <div>
+            <h3 className="text-2xl font-serif font-medium text-foreground text-center mb-10">Available Scents</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {[
+                { icon: "🍑", name: "Peach", desc: "Sweet and fruity, perfect for bedrooms" },
+                { icon: "💜", name: "Lavender", desc: "Calming and soothing, promotes deep sleep" },
+                { icon: "🌊", name: "Ocean", desc: "Fresh and clean, ideal for bathrooms and cars" },
+                { icon: "🌿", name: "Lemongrass", desc: "Refreshing and citrusy, naturally repels insects" },
+                { icon: "🍈", name: "Melon", desc: "Sweet and tropical, uplifts your mood instantly" },
+                { icon: "🌼", name: "Vanilla", desc: "Warm and cozy, creates a comforting atmosphere" },
+              ].map(s => (
+                <div key={s.name} className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm">
+                  <div className="text-3xl shrink-0">{s.icon}</div>
+                  <div>
+                    <h4 className="font-medium text-foreground">{s.name}</h4>
+                    <p className="text-sm text-muted-foreground mt-1">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
