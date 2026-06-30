@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
-import { ShoppingBag, Menu, User, LogOut } from "lucide-react";
+import { ShoppingBag, Menu, User, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -24,6 +24,7 @@ export function Navbar() {
                 <div className="flex flex-col gap-4">
                   <Link href="/" className="text-lg font-medium">Home</Link>
                   <Link href="/shop" className="text-lg font-medium">Shop All</Link>
+                  {user?.role === "admin" && <Link href="/admin" className="text-lg font-medium flex items-center gap-2"><Shield className="h-5 w-5" />Admin Panel</Link>}
                 </div>
               </div>
             </SheetContent>
@@ -56,6 +57,7 @@ export function Navbar() {
                 <Button variant="ghost" className="gap-2 hidden md:flex"><User className="h-4 w-4" /><span className="text-sm font-medium">{user.name}</span></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                {user.role === "admin" && <DropdownMenuItem asChild><Link href="/admin" className="w-full cursor-pointer"><Shield className="h-4 w-4 mr-2" />Admin Panel</Link></DropdownMenuItem>}
                 <DropdownMenuItem asChild><Link href="/orders" className="w-full cursor-pointer">My Orders</Link></DropdownMenuItem>
                 <DropdownMenuItem onClick={() => logout()} className="text-destructive cursor-pointer"><LogOut className="h-4 w-4 mr-2" />Logout</DropdownMenuItem>
               </DropdownMenuContent>
