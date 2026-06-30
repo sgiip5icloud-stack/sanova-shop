@@ -26,7 +26,6 @@ export function ProductCard({ product }: { product: Product }) {
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-base font-semibold text-primary">{formatPrice(product.price)}</span>
-              {product.originalPrice && <span className="text-xs text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>}
             </div>
             <Button variant="outline" size="icon" className="rounded-full shrink-0 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors"
               onClick={(e) => { e.preventDefault(); window.open(SHOPEE_URL, "_blank", "noopener,noreferrer"); }}>

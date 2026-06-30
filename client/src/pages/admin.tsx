@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Pencil, Trash2, Save, X, Lock, Package, Film, ShoppingBag, ChevronDown, ChevronUp, Check, Star, Eye, EyeOff } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Save, X, Lock, Package, Film, ShoppingBag, ChevronDown, ChevronUp, Check, Star, Eye, EyeOff, Upload } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { formatPrice } from "@/lib/format";
 import { getProductImage } from "@/lib/product-images";
@@ -321,9 +321,33 @@ function ProductsPanel() {
   const [addingNew, setAddingNew] = useState(false);
   const [form, setForm] = useState<ProductForm>(EMPTY_PRODUCT);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
   const qc = useQueryClient();
   const password = sessionStorage.getItem("admin_pw") || "";
   const headers: Record<string, string> = { "x-admin-password": password, "content-type": "application/json" };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { "x-admin-password": password },
+        body: fd,
+      });
+      if (!res.ok) { const err = await res.json(); alert(err.error); return; }
+      const data = await res.json();
+      setForm(f => ({ ...f, image: data.imageKey }));
+    } catch (err) {
+      alert("Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["admin-products"],
@@ -428,8 +452,25 @@ function ProductsPanel() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-sm text-muted-foreground block mb-1">Image key (tên file không có đuôi)</label>
-          <Input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="peach-1, lavender-2..." />
+          <label className="text-sm text-muted-foreground block mb-1">Ảnh sản phẩm</label>
+          <div className="flex items-center gap-3">
+            {form.image && (
+              <div className="w-16 h-16 rounded-lg border bg-white overflow-hidden shrink-0">
+                <img src={getProductImage(form.image)} alt="Preview" className="w-full h-full object-contain p-1" />
+              </div>
+            )}
+            <div className="flex-1">
+              <label className={cn(
+                "flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors",
+                uploading ? "opacity-50 pointer-events-none" : "hover:border-primary hover:bg-primary/5"
+              )}>
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploading ? "Đang upload..." : form.image ? "Đổi ảnh" : "Chọn ảnh"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+              </label>
+              {form.image && <p className="text-xs text-muted-foreground mt-1">Key: {form.image}</p>}
+            </div>
+          </div>
         </div>
         <div>
           <label className="text-sm text-muted-foreground block mb-1">Badge</label>

@@ -21,8 +21,11 @@ services:
       PORT: 8080
       NODE_ENV: production
       ADMIN_PASSWORD: sanova-admin-2024
+    volumes:
+      - assets_data:/app/assets
     ports:
       - "8080:8080"
 
 volumes:
   postgres_data:
+  assets_data:
