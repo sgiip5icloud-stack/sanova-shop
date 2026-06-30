@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
     cb(null, uniqueName);
   },
 });
-const upload = multer({
+const uploadImage = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (_req, file, cb) => {
@@ -31,6 +31,16 @@ const upload = multer({
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) cb(null, true);
     else cb(new Error("Only .jpg, .png, .webp images allowed"));
+  },
+});
+const uploadVideo = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = [".mp4", ".webm", ".mov"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error("Only .mp4, .webm, .mov videos allowed"));
   },
 });
 
@@ -174,17 +184,25 @@ router.delete("/admin/products/:id", async (req, res) => {
 });
 
 // =====================
-// IMAGE UPLOAD
+// FILE UPLOADS
 // =====================
 
-router.post("/admin/upload", (req, res, next) => {
+const adminAuth = (req: any, res: any, next: any) => {
   const password = req.headers["x-admin-password"];
   if (password !== ADMIN_PASSWORD) { res.status(401).json({ error: "Unauthorized" }); return; }
   next();
-}, upload.single("image"), (req: any, res) => {
+};
+
+router.post("/admin/upload", adminAuth, uploadImage.single("image"), (req: any, res) => {
   if (!req.file) { res.status(400).json({ error: "No file uploaded" }); return; }
   const filename = req.file.filename;
   res.json({ imageKey: filename, url: `/assets/${filename}` });
+});
+
+router.post("/admin/upload-video", adminAuth, uploadVideo.single("video"), (req: any, res) => {
+  if (!req.file) { res.status(400).json({ error: "No video uploaded" }); return; }
+  const filename = req.file.filename;
+  res.json({ filename, url: `/assets/${filename}` });
 });
 
 export default router;

@@ -225,13 +225,73 @@ function OrdersPanel() {
   );
 }
 
+function KolFormFields({ form, setForm, uploading, onVideoUpload }: {
+  form: KolForm;
+  setForm: React.Dispatch<React.SetStateAction<KolForm>>;
+  uploading: boolean;
+  onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div className="grid gap-3">
+      <Input placeholder="Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+      <Input placeholder="Channel" value={form.channel} onChange={e => setForm(f => ({ ...f, channel: e.target.value }))} />
+      <Input placeholder="Followers" value={form.followers} onChange={e => setForm(f => ({ ...f, followers: e.target.value }))} />
+      <div>
+        <label className="text-sm text-muted-foreground block mb-1">Video</label>
+        <div className="flex items-center gap-3">
+          {form.videoUrl && (
+            <video src={form.videoUrl.startsWith("/assets") ? form.videoUrl : form.videoUrl} className="w-24 h-16 rounded-lg border object-cover shrink-0" muted />
+          )}
+          <div className="flex-1 flex flex-col gap-2">
+            <label className={cn(
+              "flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors",
+              uploading ? "opacity-50 pointer-events-none" : "hover:border-primary hover:bg-primary/5"
+            )}>
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? "Đang upload..." : form.videoUrl ? "Đổi video" : "Upload video"}
+              <input type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" onChange={onVideoUpload} disabled={uploading} />
+            </label>
+            <Input placeholder="Hoặc dán Video URL" value={form.videoUrl} onChange={e => setForm(f => ({ ...f, videoUrl: e.target.value }))} />
+          </div>
+        </div>
+      </div>
+      <Input placeholder="TikTok Link" value={form.thumbnailUrl} onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))} />
+      <Input placeholder="Quote" value={form.quote} onChange={e => setForm(f => ({ ...f, quote: e.target.value }))} />
+    </div>
+  );
+}
+
 function KolPanel() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [form, setForm] = useState<KolForm>(EMPTY);
+  const [uploading, setUploading] = useState(false);
   const qc = useQueryClient();
   const password = sessionStorage.getItem("admin_pw") || "";
   const headers = { "x-admin-password": password, "content-type": "application/json" };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("video", file);
+      const res = await fetch("/api/admin/upload-video", {
+        method: "POST",
+        headers: { "x-admin-password": password },
+        body: fd,
+      });
+      if (!res.ok) { const err = await res.json(); alert(err.error); return; }
+      const data = await res.json();
+      setForm(f => ({ ...f, videoUrl: data.url }));
+    } catch (err) {
+      alert("Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const { data: videos = [], isLoading } = useQuery<KolVideo[]>({
     queryKey: ["kol-videos"],
@@ -253,17 +313,6 @@ function KolPanel() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["kol-videos"] }),
   });
 
-  const FormFields = () => (
-    <div className="grid gap-3">
-      <Input placeholder="Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-      <Input placeholder="Channel" value={form.channel} onChange={e => setForm(f => ({ ...f, channel: e.target.value }))} />
-      <Input placeholder="Followers" value={form.followers} onChange={e => setForm(f => ({ ...f, followers: e.target.value }))} />
-      <Input placeholder="Video URL" value={form.videoUrl} onChange={e => setForm(f => ({ ...f, videoUrl: e.target.value }))} />
-      <Input placeholder="TikTok Link" value={form.thumbnailUrl} onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))} />
-      <Input placeholder="Quote" value={form.quote} onChange={e => setForm(f => ({ ...f, quote: e.target.value }))} />
-    </div>
-  );
-
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
   return (
@@ -274,7 +323,7 @@ function KolPanel() {
       {addingNew && (
         <div className="border rounded-xl p-6 bg-card">
           <h3 className="font-semibold mb-4">New KOL Video</h3>
-          <FormFields />
+          <KolFormFields form={form} setForm={setForm} uploading={uploading} onVideoUpload={handleVideoUpload} />
           <div className="flex gap-2 mt-4">
             <Button onClick={() => createMut.mutate(form)} disabled={createMut.isPending}><Save className="h-4 w-4 mr-2" />Save</Button>
             <Button variant="ghost" onClick={() => setAddingNew(false)}><X className="h-4 w-4 mr-2" />Cancel</Button>
@@ -285,7 +334,7 @@ function KolPanel() {
         <div key={v.id} className="border rounded-xl p-6 bg-card">
           {editingId === v.id ? (
             <>
-              <FormFields />
+              <KolFormFields form={form} setForm={setForm} uploading={uploading} onVideoUpload={handleVideoUpload} />
               <div className="flex gap-2 mt-4">
                 <Button onClick={() => updateMut.mutate({ id: v.id, data: form })}><Save className="h-4 w-4 mr-2" />Save</Button>
                 <Button variant="ghost" onClick={() => setEditingId(null)}><X className="h-4 w-4 mr-2" />Cancel</Button>
@@ -315,6 +364,87 @@ const EMPTY_PRODUCT: ProductForm = {
   name: "SANOVA Room Fragrance Diffuser", scent: "", pack: "1", price: "", originalPrice: "",
   image: "", description: "", inStock: true, isFeatured: false, badge: "", sortOrder: "0",
 };
+
+function ProductFormFields({ form, setForm, uploading, onImageUpload }: {
+  form: ProductForm;
+  setForm: React.Dispatch<React.SetStateAction<ProductForm>>;
+  uploading: boolean;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div className="grid gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Product name</label>
+          <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="SANOVA Room Fragrance Diffuser" />
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Scent (mùi hương)</label>
+          <Input value={form.scent} onChange={e => setForm(f => ({ ...f, scent: e.target.value }))} placeholder="peach, lavender, ocean..." />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Pack</label>
+          <Input value={form.pack} onChange={e => setForm(f => ({ ...f, pack: e.target.value }))} placeholder="1, 2, 3" />
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Price (₱)</label>
+          <Input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} placeholder="279" />
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Original price</label>
+          <Input type="number" value={form.originalPrice} onChange={e => setForm(f => ({ ...f, originalPrice: e.target.value }))} placeholder="349" />
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Sort order</label>
+          <Input type="number" value={form.sortOrder} onChange={e => setForm(f => ({ ...f, sortOrder: e.target.value }))} placeholder="0" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Ảnh sản phẩm</label>
+          <div className="flex items-center gap-3">
+            {form.image && (
+              <div className="w-16 h-16 rounded-lg border bg-white overflow-hidden shrink-0">
+                <img src={getProductImage(form.image)} alt="Preview" className="w-full h-full object-contain p-1" />
+              </div>
+            )}
+            <div className="flex-1">
+              <label className={cn(
+                "flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors",
+                uploading ? "opacity-50 pointer-events-none" : "hover:border-primary hover:bg-primary/5"
+              )}>
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploading ? "Đang upload..." : form.image ? "Đổi ảnh" : "Chọn ảnh"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onImageUpload} disabled={uploading} />
+              </label>
+              {form.image && <p className="text-xs text-muted-foreground mt-1">Key: {form.image}</p>}
+            </div>
+          </div>
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground block mb-1">Badge</label>
+          <Input value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="New, Sale, Best Value, Popular" />
+        </div>
+      </div>
+      <div>
+        <label className="text-sm text-muted-foreground block mb-1">Description</label>
+        <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Mô tả sản phẩm..." rows={3} />
+      </div>
+      <div className="flex gap-6">
+        <label className="flex items-center gap-2 cursor-pointer text-sm">
+          <input type="checkbox" checked={form.inStock} onChange={e => setForm(f => ({ ...f, inStock: e.target.checked }))} className="rounded" />
+          In stock
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer text-sm">
+          <input type="checkbox" checked={form.isFeatured} onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))} className="rounded" />
+          Featured (hiện trang chủ)
+        </label>
+      </div>
+    </div>
+  );
+}
 
 function ProductsPanel() {
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -420,80 +550,6 @@ function ProductsPanel() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
   });
 
-  const productFormFields = (
-    <div className="grid gap-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Product name</label>
-          <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="SANOVA Room Fragrance Diffuser" />
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Scent (mùi hương)</label>
-          <Input value={form.scent} onChange={e => setForm(f => ({ ...f, scent: e.target.value }))} placeholder="peach, lavender, ocean..." />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Pack</label>
-          <Input value={form.pack} onChange={e => setForm(f => ({ ...f, pack: e.target.value }))} placeholder="1, 2, 3" />
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Price (₱)</label>
-          <Input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} placeholder="279" />
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Original price</label>
-          <Input type="number" value={form.originalPrice} onChange={e => setForm(f => ({ ...f, originalPrice: e.target.value }))} placeholder="349" />
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Sort order</label>
-          <Input type="number" value={form.sortOrder} onChange={e => setForm(f => ({ ...f, sortOrder: e.target.value }))} placeholder="0" />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Ảnh sản phẩm</label>
-          <div className="flex items-center gap-3">
-            {form.image && (
-              <div className="w-16 h-16 rounded-lg border bg-white overflow-hidden shrink-0">
-                <img src={getProductImage(form.image)} alt="Preview" className="w-full h-full object-contain p-1" />
-              </div>
-            )}
-            <div className="flex-1">
-              <label className={cn(
-                "flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors",
-                uploading ? "opacity-50 pointer-events-none" : "hover:border-primary hover:bg-primary/5"
-              )}>
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                {uploading ? "Đang upload..." : form.image ? "Đổi ảnh" : "Chọn ảnh"}
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-              </label>
-              {form.image && <p className="text-xs text-muted-foreground mt-1">Key: {form.image}</p>}
-            </div>
-          </div>
-        </div>
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Badge</label>
-          <Input value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="New, Sale, Best Value, Popular" />
-        </div>
-      </div>
-      <div>
-        <label className="text-sm text-muted-foreground block mb-1">Description</label>
-        <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Mô tả sản phẩm..." rows={3} />
-      </div>
-      <div className="flex gap-6">
-        <label className="flex items-center gap-2 cursor-pointer text-sm">
-          <input type="checkbox" checked={form.inStock} onChange={e => setForm(f => ({ ...f, inStock: e.target.checked }))} className="rounded" />
-          In stock
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer text-sm">
-          <input type="checkbox" checked={form.isFeatured} onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))} className="rounded" />
-          Featured (hiện trang chủ)
-        </label>
-      </div>
-    </div>
-  );
-
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
   return (
@@ -508,7 +564,7 @@ function ProductsPanel() {
       {addingNew && (
         <div className="border rounded-xl p-6 bg-card">
           <h3 className="font-semibold mb-4">New product</h3>
-          {productFormFields}
+          <ProductFormFields form={form} setForm={setForm} uploading={uploading} onImageUpload={handleImageUpload} />
           <div className="flex gap-2 mt-4">
             <Button onClick={() => createMut.mutate(form)} disabled={createMut.isPending || !form.name || !form.scent || !form.price || !form.image}>
               {createMut.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}Save
@@ -524,7 +580,7 @@ function ProductsPanel() {
           {editingId === p.id ? (
             <div className="p-6">
               <h3 className="font-semibold mb-4">Edit product #{p.id}</h3>
-              {productFormFields}
+              <ProductFormFields form={form} setForm={setForm} uploading={uploading} onImageUpload={handleImageUpload} />
               <div className="flex gap-2 mt-4">
                 <Button onClick={() => updateMut.mutate({ id: p.id, data: form })} disabled={updateMut.isPending}>
                   {updateMut.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}Save
