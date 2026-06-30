@@ -1,10 +1,38 @@
 import { Router } from "express";
 import { eq, and, asc } from "drizzle-orm";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { db } from "../db.js";
 import { productsTable } from "../schema.js";
 
 const router = Router();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "sanova-admin-2024";
+
+// Image upload setup
+const assetsDir = path.resolve(process.cwd(), "assets");
+if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, assetsDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const baseName = path.basename(file.originalname, ext)
+      .toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+    const uniqueName = `${baseName}-${Date.now()}${ext}`;
+    cb(null, uniqueName);
+  },
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = [".jpg", ".jpeg", ".png", ".webp"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error("Only .jpg, .png, .webp images allowed"));
+  },
+});
 
 function checkAdmin(req: any, res: any): boolean {
   const password = req.headers["x-admin-password"] || req.body?.adminPassword;
@@ -143,6 +171,20 @@ router.delete("/admin/products/:id", async (req, res) => {
     console.error("Delete product error:", err);
     res.status(500).json({ error: "Failed to delete product" });
   }
+});
+
+// =====================
+// IMAGE UPLOAD
+// =====================
+
+router.post("/admin/upload", (req, res, next) => {
+  const password = req.headers["x-admin-password"];
+  if (password !== ADMIN_PASSWORD) { res.status(401).json({ error: "Unauthorized" }); return; }
+  next();
+}, upload.single("image"), (req: any, res) => {
+  if (!req.file) { res.status(400).json({ error: "No file uploaded" }); return; }
+  const filename = req.file.filename;
+  res.json({ imageKey: filename, url: `/assets/${filename}` });
 });
 
 export default router;
